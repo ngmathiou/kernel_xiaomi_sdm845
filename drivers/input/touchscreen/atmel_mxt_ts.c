@@ -6819,6 +6819,8 @@ static int mxt_remove(struct i2c_client *client)
 
 	g_mxt_data = NULL;
 
+	disable_irq(data->irq);
+
 	return 0;
 }
 
@@ -6830,10 +6832,9 @@ static void mxt_shutdown(struct i2c_client *client)
 	data->state = SHUTDOWN;
 }
 
-#ifdef CONFIG_PM
-static int mxt_ts_suspend(struct device *dev)
-{
-	struct mxt_data *data =  dev_get_drvdata(dev);
+	enable_irq(data->irq);
+
+	mutex_lock(&input_dev->mutex);
 
 	if (device_may_wakeup(dev) &&
 			data->wakeup_gesture_mode) {
